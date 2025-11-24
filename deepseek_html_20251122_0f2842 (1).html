@@ -1,0 +1,2620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TESCO DC PERFORMANCE TRACKER</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <style>
+        /* Your existing CSS remains exactly the same */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f6fa;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .App {
+            min-height: 100vh;
+        }
+
+        .app-header {
+            background: linear-gradient(135deg, #00539F 0%, #FF0000 100%);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .app-title {
+            margin-bottom: 0.3rem;
+        }
+
+        .app-header h1 {
+            font-size: 2.2rem;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+
+        .app-subtitle {
+            font-size: 1rem;
+            font-weight: 300;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .user-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .user-section input {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            width: 180px;
+        }
+
+        .user-section button {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .user-section button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .user-welcome {
+            color: white;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .edit-name-btn {
+            background: rgba(255, 255, 255, 0.3);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.5);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .edit-name-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        .settings-section {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+        }
+
+        .settings-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .settings-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .settings-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 700px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .settings-content h3 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .week-management, .day-off-selection, .holiday-management {
+            margin-bottom: 1.5rem;
+        }
+
+        .week-management h4, .day-off-selection h4, .holiday-management h4 {
+            margin-bottom: 1rem;
+            color: #2c3e50;
+        }
+
+        .week-inputs, .holiday-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .holiday-type-selection {
+            margin-bottom: 1rem;
+        }
+
+        .holiday-type-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .holiday-type-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: #f8f9fa;
+            border: 2px solid #e1e8ed;
+            border-radius: 5px;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .holiday-type-btn.active {
+            background: #00539F;
+            color: white;
+            border-color: #00539F;
+        }
+
+        .single-holiday-inputs, .range-holiday-inputs {
+            display: none;
+        }
+
+        .single-holiday-inputs.active, .range-holiday-inputs.active {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .week-list, .holiday-list {
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #e1e8ed;
+            border-radius: 5px;
+            padding: 0.5rem;
+        }
+
+        .week-item, .holiday-item {
+            padding: 0.5rem;
+            border-bottom: 1px solid #e1e8ed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .week-item:last-child, .holiday-item:last-child {
+            border-bottom: none;
+        }
+
+        .day-checkboxes {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 0.5rem;
+        }
+
+        .day-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .work-days-info {
+            background: #e7f3ff;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .holiday-info {
+            background: #fff3e0;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .settings-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .input-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .input-section h2 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        .input-group {
+            margin-bottom: 1rem;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #555;
+        }
+
+        .input-group input[type="date"],
+        .input-group input[type="number"],
+        .input-group input[type="text"] {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .input-group input[type="date"]:focus,
+        .input-group input[type="number"]:focus,
+        .input-group input[type="text"]:focus {
+            outline: none;
+            border-color: #00539F;
+        }
+
+        .performance-inputs {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 1rem;
+            align-items: end;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+        }
+
+        .checkbox-group label {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            cursor: pointer;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+        }
+
+        button {
+            background: linear-gradient(135deg, #00539F 0%, #FF0000 100%);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0, 83, 159, 0.4);
+        }
+
+        .navigation {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .navigation button {
+            background: white;
+            color: #00539F;
+            border: 2px solid #00539F;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .navigation button.active {
+            background: #00539F;
+            color: white;
+        }
+
+        .content-section {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 20px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .table-container {
+            padding: 2rem;
+        }
+
+        .table-container h3 {
+            color: #2c3e50;
+            margin-bottom: 1.5rem;
+            font-weight: 400;
+        }
+
+        .performance-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 1.5rem;
+        }
+
+        .performance-table th,
+        .performance-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e8ed;
+        }
+
+        .performance-table th {
+            background-color: #f8f9fa;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .performance-table tr:hover {
+            background-color: #f8f9fa;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .edit-btn, .delete-btn {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.85rem;
+        }
+
+        .edit-btn {
+            background: #28a745;
+        }
+
+        .delete-btn {
+            background: #dc3545;
+        }
+
+        .view-controls {
+            margin-bottom: 1.5rem;
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .view-controls select {
+            padding: 0.5rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
+        .chart-container {
+            margin: 2rem 0;
+            position: relative;
+            height: 400px;
+        }
+
+        .download-btn {
+            background: #17a2b8;
+            margin-left: auto;
+        }
+
+        .download-record-btn {
+            background: #6f42c1;
+        }
+
+        .summary {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 5px;
+            margin-top: 1.5rem;
+        }
+
+        .summary h4 {
+            color: #2c3e50;
+            margin-bottom: 1rem;
+        }
+
+        .summary p {
+            margin-bottom: 0.5rem;
+            font-size: 1.1rem;
+        }
+
+        .day-off {
+            background-color: #ffeaea;
+        }
+
+        .holiday {
+            background-color: #e8f5e8;
+        }
+
+        .edit-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 100;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .edit-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .edit-content h3 {
+            margin-bottom: 1.5rem;
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 0.5rem;
+        }
+
+        .edit-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .percentage {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+
+        /* Performance color coding */
+        .performance-low {
+            background-color: #ffebee !important; /* Light red */
+        }
+
+        .performance-medium {
+            background-color: #fff9e6 !important; /* Light yellow */
+        }
+
+        .performance-high {
+            background-color: #e8f5e9 !important; /* Light green */
+        }
+
+        .bonus-amount {
+            font-weight: bold;
+            color: #27ae60;
+        }
+
+        /* User ID Section */
+        .user-id-section {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 0.5rem;
+        }
+
+        .user-id-section input {
+            width: 120px;
+            text-align: center;
+        }
+
+        .user-id-display {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .user-id-display span {
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.3rem 0.7rem;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+
+        /* Login Section */
+        .login-section {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+            margin-top: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .login-section input {
+            padding: 0.5rem;
+            border: none;
+            border-radius: 4px;
+            width: 180px;
+        }
+
+        .login-section button {
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .login-section button:hover {
+            background: rgba(255, 255, 255, 0.3);
+        }
+
+        .register-link {
+            color: white;
+            margin-top: 0.5rem;
+            text-decoration: underline;
+            cursor: pointer;
+            background: none;
+            border: none;
+            font-size: 0.9rem;
+        }
+
+        .register-link:hover {
+            color: #e0e0e0;
+        }
+
+        /* Registration Steps */
+        .registration-step {
+            display: none;
+        }
+
+        .registration-step.active {
+            display: block;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+            
+            .performance-inputs {
+                grid-template-columns: 1fr;
+            }
+            
+            .navigation {
+                flex-direction: column;
+            }
+            
+            .navigation button {
+                min-width: auto;
+            }
+            
+            .performance-table {
+                font-size: 0.9rem;
+            }
+            
+            .performance-table th,
+            .performance-table td {
+                padding: 0.5rem;
+            }
+            
+            .day-checkboxes {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .week-inputs, .holiday-inputs,
+            .single-holiday-inputs.active, .range-holiday-inputs.active {
+                grid-template-columns: 1fr;
+            }
+            
+            .holiday-type-buttons {
+                flex-direction: column;
+            }
+            
+            .user-section, .login-section {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .settings-section {
+                position: static;
+                text-align: center;
+                margin-top: 1rem;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .view-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .user-welcome {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+            
+            .app-header {
+                padding: 1rem 0;
+            }
+            
+            .app-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .app-subtitle {
+                fontSize: 0.9rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .app-header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .app-subtitle {
+                font-size: 0.8rem;
+            }
+            
+            .user-section, .login-section {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="App">
+        <header class="app-header">
+            <div class="app-title">
+                <h1>TESCO DC PERFORMANCE TRACKER</h1>
+                <div class="app-subtitle">Made By MuNnA 🇧🇩</div>
+            </div>
+            
+            <!-- Login Section (shown by default) -->
+            <div class="login-section" id="loginSection">
+                <input type="text" id="loginNameInput" placeholder="Enter your name">
+                <input type="text" id="loginIdInput" placeholder="4-digit ID" maxlength="4">
+                <button id="loginBtn">Login</button>
+                <button class="register-link" id="registerLink">Register Now</button>
+            </div>
+            
+            <!-- User Section (shown after login) -->
+            <div class="user-section" id="userSection" style="display: none;">
+                <div id="userWelcome" class="user-welcome">
+                    <span id="welcomeText"></span>
+                    <div class="user-id-display">
+                        <span id="userIdDisplay"></span>
+                        <button class="edit-name-btn" id="editNameBtn">Change Name/ID</button>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="settings-section">
+                <button class="settings-btn" id="settingsBtn">Settings</button>
+            </div>
+        </header>
+
+        <div class="settings-modal" id="settingsModal">
+            <div class="settings-content">
+                <h3>Application Settings</h3>
+                
+                <div class="week-management">
+                    <h4>Manage Weeks</h4>
+                    <div class="week-inputs">
+                        <div class="input-group">
+                            <label>Week Start Date (Sunday):</label>
+                            <input type="date" id="weekStartDate">
+                        </div>
+                        <div class="input-group">
+                            <label>Week End Date (Saturday):</label>
+                            <input type="date" id="weekEndDate">
+                        </div>
+                    </div>
+                    <div class="input-group">
+                        <label>Week Name/Number:</label>
+                        <input type="text" id="weekName" placeholder="e.g., Week 1 or January Week 1">
+                    </div>
+                    <button id="addWeekBtn" style="width: 100%; margin-bottom: 1rem;">Add Week</button>
+                    
+                    <!-- Hidden existing weeks section -->
+                    <div style="display: none;">
+                        <h4>Existing Weeks</h4>
+                        <div class="week-list" id="weekList">
+                            <!-- Weeks will be listed here but hidden from view -->
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="day-off-selection">
+                    <h4>Select Your 2 Days Off</h4>
+                    <div class="day-checkboxes">
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="sundayOff" value="Sunday">
+                            <label for="sundayOff">Sunday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="mondayOff" value="Monday">
+                            <label for="mondayOff">Monday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="tuesdayOff" value="Tuesday">
+                            <label for="tuesdayOff">Tuesday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="wednesdayOff" value="Wednesday">
+                            <label for="wednesdayOff">Wednesday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="thursdayOff" value="Thursday">
+                            <label for="thursdayOff">Thursday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="fridayOff" value="Friday">
+                            <label for="fridayOff">Friday</label>
+                        </div>
+                        <div class="day-checkbox">
+                            <input type="checkbox" id="saturdayOff" value="Saturday">
+                            <label for="saturdayOff">Saturday</label>
+                        </div>
+                    </div>
+                    <div class="work-days-info">
+                        <strong>Note:</strong> Please select exactly 2 days as your days off. The remaining 5 days will be considered as your working days for performance calculations.
+                    </div>
+                </div>
+
+                <div class="holiday-management">
+                    <h4>Manage Holidays</h4>
+                    
+                    <div class="holiday-type-selection">
+                        <div class="holiday-type-buttons">
+                            <div class="holiday-type-btn active" data-type="single">Single Day Holiday</div>
+                            <div class="holiday-type-btn" data-type="range">Holiday Range</div>
+                        </div>
+                    </div>
+
+                    <div class="single-holiday-inputs active">
+                        <div class="input-group">
+                            <label>Holiday Date:</label>
+                            <input type="date" id="singleHolidayDate">
+                        </div>
+                        <div class="input-group">
+                            <label>Holiday Name:</label>
+                            <input type="text" id="singleHolidayName" placeholder="e.g., Christmas, Annual Leave">
+                        </div>
+                    </div>
+
+                    <div class="range-holiday-inputs">
+                        <div class="input-group">
+                            <label>Holiday Start Date:</label>
+                            <input type="date" id="holidayStartDate">
+                        </div>
+                        <div class="input-group">
+                            <label>Holiday End Date:</label>
+                            <input type="date" id="holidayEndDate">
+                        </div>
+                        <div class="input-group" style="grid-column: 1 / -1;">
+                            <label>Holiday Name:</label>
+                            <input type="text" id="rangeHolidayName" placeholder="e.g., Summer Vacation, Sick Leave">
+                        </div>
+                    </div>
+                    
+                    <button id="addHolidayBtn" style="width: 100%; margin-bottom: 1rem;">Add Holiday</button>
+                    
+                    <!-- Hidden existing holidays section -->
+                    <div style="display: none;">
+                        <h4>Existing Holidays</h4>
+                        <div class="holiday-list" id="holidayList">
+                            <!-- Holidays will be listed here but hidden from view -->
+                        </div>
+                    </div>
+                    <div class="holiday-info">
+                        <strong>Note:</strong> Holidays are excluded from performance calculations. When you add a holiday, it will be treated as a non-working day for performance tracking purposes.
+                    </div>
+                </div>
+                
+                <div class="settings-actions">
+                    <button id="saveSettings">Save Settings</button>
+                    <button id="closeSettings" style="background: #6c757d;">Close</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="edit-modal" id="editModal">
+            <div class="edit-content">
+                <h3>Edit Performance Record</h3>
+                
+                <div class="input-group">
+                    <label>Date:</label>
+                    <input type="date" id="editDateInput">
+                </div>
+                
+                <div class="input-group">
+                    <label>Picking:</label>
+                    <input type="number" id="editPickingInput" placeholder="Enter picking count">
+                </div>
+                
+                <div class="input-group">
+                    <label>Loading:</label>
+                    <input type="number" id="editLoadingInput" placeholder="Enter loading count">
+                </div>
+                
+                <div class="input-group checkbox-group">
+                    <label>
+                        <input type="checkbox" id="editOneShiftCheckbox">
+                        Done in One Shift
+                    </label>
+                </div>
+                
+                <div class="edit-actions">
+                    <button id="saveEdit">Save Changes</button>
+                    <button id="cancelEdit" style="background: #6c757d;">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- User Registration Modal -->
+        <div class="edit-modal" id="registerModal">
+            <div class="edit-content">
+                <!-- Step 1: Name -->
+                <div class="registration-step active" id="step1">
+                    <h3>Register - Step 1: Enter Your Name</h3>
+                    
+                    <div class="input-group">
+                        <label>Name:</label>
+                        <input type="text" id="registerNameInput" placeholder="Enter your name">
+                    </div>
+                    
+                    <div class="edit-actions">
+                        <button id="nextStep1">Next</button>
+                        <button id="cancelRegister" style="background: #6c757d;">Cancel</button>
+                    </div>
+                </div>
+                
+                <!-- Step 2: ID -->
+                <div class="registration-step" id="step2">
+                    <h3>Register - Step 2: Enter 4-digit ID</h3>
+                    
+                    <div class="input-group">
+                        <label>4-digit ID:</label>
+                        <input type="text" id="registerIdInput" placeholder="Enter 4-digit ID" maxlength="4">
+                    </div>
+                    
+                    <div class="edit-actions">
+                        <button id="saveRegister">Register</button>
+                        <button id="backStep1" style="background: #6c757d;">Back</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <!-- Input Section -->
+            <div class="input-section">
+                <h2>Add Daily Performance</h2>
+                <div class="input-group">
+                    <label>Date:</label>
+                    <input type="date" id="dateInput">
+                </div>
+                
+                <div class="performance-inputs">
+                    <div class="input-group">
+                        <label>Picking:</label>
+                        <input type="number" id="pickingInput" placeholder="Enter picking count">
+                    </div>
+                    
+                    <div class="input-group">
+                        <label>Loading:</label>
+                        <input type="number" id="loadingInput" placeholder="Enter loading count">
+                    </div>
+                    
+                    <div class="input-group checkbox-group">
+                        <label>
+                            <input type="checkbox" id="oneShiftCheckbox">
+                            Done in One Shift
+                        </label>
+                    </div>
+                    
+                    <button id="addRecordBtn">Add Record</button>
+                </div>
+            </div>
+
+            <!-- Navigation -->
+            <div class="navigation">
+                <button class="view-btn active" data-view="daily">Daily View</button>
+                <button class="view-btn" data-view="weekly">Weekly View</button>
+                <button class="view-btn" data-view="monthly">Monthly View</button>
+                <button class="view-btn" data-view="specificWeek">Specific Week</button>
+                <button class="view-btn" data-view="specificMonth">Specific Month</button>
+            </div>
+
+            <!-- Content Section -->
+            <div class="content-section" id="contentSection">
+                <!-- Content will be dynamically populated here -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // FIXED VERSION - Enhanced for Google Sites compatibility
+        let performanceData = [];
+        let weeksData = [];
+        let holidaysData = [];
+        let daysOff = ['Saturday', 'Sunday'];
+        let currentEditId = null;
+        let weeklyChart = null;
+        let monthlyChart = null;
+        let currentUserId = null;
+
+        // Initialize with current date
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOM loaded - initializing application');
+            
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('dateInput').value = today;
+            
+            // Initialize data storage with unique keys for Google Sites
+            initializeDataStorage();
+            
+            // Check if user is already logged in
+            checkExistingLogin();
+            
+            // Add all event listeners
+            setupEventListeners();
+        });
+
+        // Initialize data storage with unique keys
+        function initializeDataStorage() {
+            // Use unique keys to avoid conflicts in Google Sites environment
+            if (!localStorage.getItem('tesco_warehouseUsers')) {
+                localStorage.setItem('tesco_warehouseUsers', '[]');
+            }
+            if (!localStorage.getItem('tesco_warehouseWeeks')) {
+                localStorage.setItem('tesco_warehouseWeeks', '[]');
+            }
+            if (!localStorage.getItem('tesco_warehouseHolidays')) {
+                localStorage.setItem('tesco_warehouseHolidays', '[]');
+            }
+            if (!localStorage.getItem('tesco_warehouseDaysOff')) {
+                localStorage.setItem('tesco_warehouseDaysOff', JSON.stringify(daysOff));
+            }
+        }
+
+        // Check for existing login
+        function checkExistingLogin() {
+            const currentUser = localStorage.getItem('tesco_currentUser');
+            if (currentUser) {
+                try {
+                    const user = JSON.parse(currentUser);
+                    if (user && user.name && user.id) {
+                        console.log('Found existing user:', user);
+                        showUserWelcome(user.name, user.id);
+                        loadUserData(user.id);
+                        return;
+                    }
+                } catch (e) {
+                    console.error('Error parsing current user:', e);
+                }
+            }
+            
+            // Show login section if no valid user found
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('userSection').style.display = 'none';
+        }
+
+        // Setup all event listeners
+        function setupEventListeners() {
+            // Main functionality
+            document.getElementById('addRecordBtn').addEventListener('click', addPerformanceRecord);
+            document.getElementById('loginBtn').addEventListener('click', loginUser);
+            document.getElementById('editNameBtn').addEventListener('click', editUserName);
+            document.getElementById('settingsBtn').addEventListener('click', openSettings);
+            document.getElementById('saveSettings').addEventListener('click', saveSettings);
+            document.getElementById('closeSettings').addEventListener('click', closeSettings);
+            document.getElementById('saveEdit').addEventListener('click', saveEdit);
+            document.getElementById('cancelEdit').addEventListener('click', cancelEdit);
+            document.getElementById('addWeekBtn').addEventListener('click', addWeek);
+            document.getElementById('addHolidayBtn').addEventListener('click', addHoliday);
+            
+            // Registration
+            document.getElementById('registerLink').addEventListener('click', showRegistration);
+            document.getElementById('saveRegister').addEventListener('click', registerUser);
+            document.getElementById('cancelRegister').addEventListener('click', cancelRegister);
+            document.getElementById('nextStep1').addEventListener('click', nextStep1);
+            document.getElementById('backStep1').addEventListener('click', backStep1);
+            
+            // Holiday type selection
+            document.querySelectorAll('.holiday-type-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.holiday-type-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const holidayType = this.getAttribute('data-type');
+                    document.querySelectorAll('.single-holiday-inputs, .range-holiday-inputs').forEach(section => {
+                        section.classList.remove('active');
+                    });
+                    
+                    if (holidayType === 'single') {
+                        document.querySelector('.single-holiday-inputs').classList.add('active');
+                    } else {
+                        document.querySelector('.range-holiday-inputs').classList.add('active');
+                    }
+                });
+            });
+            
+            // Day off checkboxes
+            document.querySelectorAll('.day-checkbox input').forEach(checkbox => {
+                checkbox.addEventListener('change', function() {
+                    const checkedBoxes = document.querySelectorAll('.day-checkbox input:checked');
+                    if (checkedBoxes.length > 2) {
+                        this.checked = false;
+                        alert('Please select exactly 2 days off. You have 5 working days.');
+                    }
+                });
+            });
+            
+            // View buttons
+            document.querySelectorAll('.view-btn').forEach(button => {
+                button.addEventListener('click', function() {
+                    document.querySelectorAll('.view-btn').forEach(btn => {
+                        btn.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    const view = this.getAttribute('data-view');
+                    switchView(view);
+                });
+            });
+        }
+
+        // Load data from localStorage for specific user
+        function loadUserData(userId) {
+            console.log('Loading data for user:', userId);
+            
+            const savedData = localStorage.getItem(`tesco_performance_${userId}`);
+            if (savedData) {
+                try {
+                    performanceData = JSON.parse(savedData);
+                    console.log('Loaded performance data:', performanceData.length, 'records');
+                } catch (e) {
+                    console.error('Error parsing performance data:', e);
+                    performanceData = [];
+                }
+            } else {
+                performanceData = [];
+            }
+            
+            loadUserSettings();
+            loadWeeks();
+            loadHolidays();
+            renderDailyPerformance();
+        }
+
+        // Load weeks data
+        function loadWeeks() {
+            const savedWeeks = localStorage.getItem('tesco_warehouseWeeks');
+            if (savedWeeks) {
+                try {
+                    weeksData = JSON.parse(savedWeeks);
+                    renderWeekList();
+                } catch (e) {
+                    console.error('Error parsing weeks data:', e);
+                    weeksData = [];
+                }
+            }
+        }
+
+        // Load holidays data
+        function loadHolidays() {
+            const savedHolidays = localStorage.getItem('tesco_warehouseHolidays');
+            if (savedHolidays) {
+                try {
+                    holidaysData = JSON.parse(savedHolidays);
+                    renderHolidayList();
+                } catch (e) {
+                    console.error('Error parsing holidays data:', e);
+                    holidaysData = [];
+                }
+            }
+        }
+
+        // Load user settings
+        function loadUserSettings() {
+            const savedDaysOff = localStorage.getItem('tesco_warehouseDaysOff');
+            if (savedDaysOff) {
+                try {
+                    daysOff = JSON.parse(savedDaysOff);
+                    
+                    // Update checkboxes
+                    daysOff.forEach(day => {
+                        const checkbox = document.getElementById(day.toLowerCase() + 'Off');
+                        if (checkbox) {
+                            checkbox.checked = true;
+                        }
+                    });
+                } catch (e) {
+                    console.error('Error parsing days off:', e);
+                }
+            }
+        }
+
+        // Show registration modal
+        function showRegistration() {
+            document.getElementById('registerModal').style.display = 'flex';
+            showStep(1);
+        }
+
+        // Show specific registration step
+        function showStep(stepNumber) {
+            document.querySelectorAll('.registration-step').forEach(step => {
+                step.classList.remove('active');
+            });
+            document.getElementById(`step${stepNumber}`).classList.add('active');
+        }
+
+        // Registration step navigation
+        function nextStep1() {
+            const name = document.getElementById('registerNameInput').value.trim();
+            
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+            
+            showStep(2);
+        }
+
+        function backStep1() {
+            showStep(1);
+        }
+
+        // Login user - FIXED VERSION
+        function loginUser() {
+            const name = document.getElementById('loginNameInput').value.trim();
+            const id = document.getElementById('loginIdInput').value.trim();
+            
+            console.log('Login attempt:', { name, id });
+            
+            if (!name || !id) {
+                alert('Please enter both name and 4-digit ID');
+                return;
+            }
+            
+            if (id.length !== 4 || !/^\d+$/.test(id)) {
+                alert('Please enter a valid 4-digit ID (numbers only)');
+                return;
+            }
+            
+            // Check if user exists
+            const users = getUsers();
+            const user = users.find(u => u.name.toLowerCase() === name.toLowerCase() && u.id === id);
+            
+            if (user) {
+                // User exists, log them in
+                currentUserId = id;
+                localStorage.setItem('tesco_currentUser', JSON.stringify({name: user.name, id: user.id}));
+                showUserWelcome(user.name, id);
+                loadUserData(id);
+                console.log('Login successful for user:', user.name);
+            } else {
+                alert('User not found. Please check your name and ID, or register as a new user.');
+                console.log('User not found. Available users:', users);
+            }
+        }
+
+        // Get users from localStorage
+        function getUsers() {
+            try {
+                const users = localStorage.getItem('tesco_warehouseUsers');
+                return users ? JSON.parse(users) : [];
+            } catch (e) {
+                console.error('Error getting users:', e);
+                return [];
+            }
+        }
+
+        // Register new user - FIXED VERSION
+        function registerUser() {
+            const name = document.getElementById('registerNameInput').value.trim();
+            const id = document.getElementById('registerIdInput').value.trim();
+            
+            console.log('Registration attempt:', { name, id });
+            
+            if (!name || !id) {
+                alert('Please complete all registration steps');
+                return;
+            }
+            
+            if (id.length !== 4 || !/^\d+$/.test(id)) {
+                alert('Please enter a valid 4-digit ID (numbers only)');
+                return;
+            }
+            
+            // Check if ID already exists
+            const users = getUsers();
+            if (users.some(u => u.id === id)) {
+                alert('This ID is already taken. Please choose a different one.');
+                return;
+            }
+            
+            // Check if name already exists with different ID
+            if (users.some(u => u.name.toLowerCase() === name.toLowerCase())) {
+                alert('This name is already registered. Please use a different name or login with your existing ID.');
+                return;
+            }
+            
+            // Add new user
+            users.push({name, id});
+            localStorage.setItem('tesco_warehouseUsers', JSON.stringify(users));
+            
+            // Log in the new user
+            currentUserId = id;
+            localStorage.setItem('tesco_currentUser', JSON.stringify({name, id}));
+            showUserWelcome(name, id);
+            loadUserData(id);
+            
+            // Close registration modal
+            document.getElementById('registerModal').style.display = 'none';
+            
+            // Clear registration inputs
+            document.getElementById('registerNameInput').value = '';
+            document.getElementById('registerIdInput').value = '';
+            
+            // Reset to step 1
+            showStep(1);
+            
+            console.log('Registration successful for user:', name);
+        }
+
+        // Cancel registration
+        function cancelRegister() {
+            document.getElementById('registerModal').style.display = 'none';
+            document.getElementById('registerNameInput').value = '';
+            document.getElementById('registerIdInput').value = '';
+            showStep(1);
+        }
+
+        // Show user welcome message
+        function showUserWelcome(name, id) {
+            document.getElementById('welcomeText').textContent = `Welcome, ${name}!`;
+            document.getElementById('userIdDisplay').textContent = `ID: ${id}`;
+            document.getElementById('userSection').style.display = 'flex';
+            document.getElementById('loginSection').style.display = 'none';
+            
+            // Clear login inputs
+            document.getElementById('loginNameInput').value = '';
+            document.getElementById('loginIdInput').value = '';
+        }
+
+        // Edit user name
+        function editUserName() {
+            localStorage.removeItem('tesco_currentUser');
+            currentUserId = null;
+            document.getElementById('userSection').style.display = 'none';
+            document.getElementById('loginSection').style.display = 'flex';
+            document.getElementById('loginNameInput').value = '';
+            document.getElementById('loginIdInput').value = '';
+        }
+
+        // Open settings modal
+        function openSettings() {
+            document.getElementById('settingsModal').style.display = 'flex';
+        }
+
+        // Close settings modal
+        function closeSettings() {
+            document.getElementById('settingsModal').style.display = 'none';
+        }
+
+        // Add a new week
+        function addWeek() {
+            const startDate = document.getElementById('weekStartDate').value;
+            const endDate = document.getElementById('weekEndDate').value;
+            const name = document.getElementById('weekName').value.trim();
+            
+            if (!startDate || !endDate || !name) {
+                alert('Please fill in all week details');
+                return;
+            }
+            
+            if (new Date(startDate) >= new Date(endDate)) {
+                alert('Week start date must be before end date');
+                return;
+            }
+            
+            // Check if week already exists
+            if (weeksData.some(week => week.name === name)) {
+                alert('A week with this name already exists');
+                return;
+            }
+            
+            const newWeek = {
+                id: Date.now(),
+                name: name,
+                startDate: startDate,
+                endDate: endDate
+            };
+            
+            weeksData.push(newWeek);
+            saveWeeks();
+            renderWeekList();
+            
+            document.getElementById('weekStartDate').value = '';
+            document.getElementById('weekEndDate').value = '';
+            document.getElementById('weekName').value = '';
+        }
+
+        // Delete a week
+        function deleteWeek(id) {
+            if (confirm('Are you sure you want to delete this week? This will not delete performance records.')) {
+                weeksData = weeksData.filter(week => week.id !== id);
+                saveWeeks();
+                renderWeekList();
+            }
+        }
+
+        // Save weeks data
+        function saveWeeks() {
+            localStorage.setItem('tesco_warehouseWeeks', JSON.stringify(weeksData));
+        }
+
+        // Render week list
+        function renderWeekList() {
+            const weekList = document.getElementById('weekList');
+            weekList.innerHTML = '';
+            
+            if (weeksData.length === 0) {
+                weekList.innerHTML = '<p>No weeks added yet</p>';
+                return;
+            }
+            
+            weeksData.forEach(week => {
+                const weekItem = document.createElement('div');
+                weekItem.className = 'week-item';
+                weekItem.innerHTML = `
+                    <div>
+                        <strong>${week.name}</strong><br>
+                        <small>${formatDate(week.startDate)} to ${formatDate(week.endDate)}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteWeek(${week.id})">Delete</button>
+                `;
+                weekList.appendChild(weekItem);
+            });
+        }
+
+        // Add a new holiday
+        function addHoliday() {
+            const holidayType = document.querySelector('.holiday-type-btn.active').getAttribute('data-type');
+            let startDate, endDate, holidayName;
+
+            if (holidayType === 'single') {
+                startDate = document.getElementById('singleHolidayDate').value;
+                endDate = startDate;
+                holidayName = document.getElementById('singleHolidayName').value.trim();
+            } else {
+                startDate = document.getElementById('holidayStartDate').value;
+                endDate = document.getElementById('holidayEndDate').value;
+                holidayName = document.getElementById('rangeHolidayName').value.trim();
+            }
+            
+            if (!startDate || !holidayName) {
+                alert('Please fill in all required holiday details');
+                return;
+            }
+
+            if (holidayType === 'range' && !endDate) {
+                alert('Please provide an end date for the holiday range');
+                return;
+            }
+
+            if (holidayType === 'range' && new Date(startDate) > new Date(endDate)) {
+                alert('Holiday start date must be before or equal to end date');
+                return;
+            }
+
+            // Generate dates for the range
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            const datesInRange = [];
+
+            for (let date = new Date(start); date <= end; date.setDate(date.getDate() + 1)) {
+                datesInRange.push(new Date(date).toISOString().split('T')[0]);
+            }
+
+            // Check for existing holidays in the range
+            const existingHolidays = datesInRange.filter(date => 
+                holidaysData.some(holiday => holiday.date === date)
+            );
+
+            if (existingHolidays.length > 0) {
+                alert(`Some dates in this range are already marked as holidays: ${existingHolidays.join(', ')}`);
+                return;
+            }
+
+            // Add all dates as separate holiday entries
+            datesInRange.forEach(date => {
+                const newHoliday = {
+                    id: Date.now() + Math.random(),
+                    date: date,
+                    name: holidayName,
+                    isRange: holidayType === 'range',
+                    rangeId: holidayType === 'range' ? Date.now() : null
+                };
+                
+                holidaysData.push(newHoliday);
+            });
+
+            saveHolidays();
+            renderHolidayList();
+            
+            document.getElementById('singleHolidayDate').value = '';
+            document.getElementById('singleHolidayName').value = '';
+            document.getElementById('holidayStartDate').value = '';
+            document.getElementById('holidayEndDate').value = '';
+            document.getElementById('rangeHolidayName').value = '';
+        }
+
+        // Delete a holiday
+        function deleteHoliday(id) {
+            if (confirm('Are you sure you want to delete this holiday?')) {
+                const holidayToDelete = holidaysData.find(h => h.id === id);
+                if (holidayToDelete && holidayToDelete.isRange) {
+                    holidaysData = holidaysData.filter(holiday => 
+                        !(holiday.isRange && holiday.rangeId === holidayToDelete.rangeId)
+                    );
+                } else {
+                    holidaysData = holidaysData.filter(holiday => holiday.id !== id);
+                }
+                saveHolidays();
+                renderHolidayList();
+            }
+        }
+
+        // Save holidays data
+        function saveHolidays() {
+            localStorage.setItem('tesco_warehouseHolidays', JSON.stringify(holidaysData));
+        }
+
+        // Render holiday list
+        function renderHolidayList() {
+            const holidayList = document.getElementById('holidayList');
+            holidayList.innerHTML = '';
+            
+            if (holidaysData.length === 0) {
+                holidayList.innerHTML = '<p>No holidays added yet</p>';
+                return;
+            }
+
+            const groupedHolidays = {};
+            holidaysData.forEach(holiday => {
+                const key = holiday.isRange ? holiday.rangeId : holiday.id;
+                if (!groupedHolidays[key]) {
+                    groupedHolidays[key] = {
+                        name: holiday.name,
+                        dates: [],
+                        isRange: holiday.isRange,
+                        id: holiday.id
+                    };
+                }
+                groupedHolidays[key].dates.push(holiday.date);
+            });
+
+            Object.values(groupedHolidays).forEach(holidayGroup => {
+                const holidayItem = document.createElement('div');
+                holidayItem.className = 'holiday-item';
+                
+                let dateText;
+                if (holidayGroup.isRange && holidayGroup.dates.length > 1) {
+                    const sortedDates = holidayGroup.dates.sort();
+                    dateText = `${formatDate(sortedDates[0])} to ${formatDate(sortedDates[sortedDates.length - 1])}`;
+                } else {
+                    dateText = formatDate(holidayGroup.dates[0]);
+                }
+                
+                holidayItem.innerHTML = `
+                    <div>
+                        <strong>${holidayGroup.name}</strong><br>
+                        <small>${dateText}</small>
+                    </div>
+                    <button class="delete-btn" onclick="deleteHoliday(${holidayGroup.id})">Delete</button>
+                `;
+                holidayList.appendChild(holidayItem);
+            });
+        }
+
+        // Check if a date is a holiday
+        function isHoliday(date) {
+            return holidaysData.some(holiday => holiday.date === date);
+        }
+
+        // Get holiday name for a date
+        function getHolidayName(date) {
+            const holiday = holidaysData.find(h => h.date === date);
+            return holiday ? holiday.name : null;
+        }
+
+        // Format date for display
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+        }
+
+        // Save settings
+        function saveSettings() {
+            const selectedDaysOff = [];
+            document.querySelectorAll('.day-checkbox input:checked').forEach(checkbox => {
+                selectedDaysOff.push(checkbox.value);
+            });
+            
+            if (selectedDaysOff.length !== 2) {
+                alert('Please select exactly 2 days off. You should have 5 working days.');
+                return;
+            }
+            
+            daysOff = selectedDaysOff;
+            localStorage.setItem('tesco_warehouseDaysOff', JSON.stringify(daysOff));
+            closeSettings();
+            
+            const activeView = document.querySelector('.view-btn.active').getAttribute('data-view');
+            switchView(activeView);
+        }
+
+        // Save data to localStorage for specific user
+        function saveData(data) {
+            if (currentUserId) {
+                localStorage.setItem(`tesco_performance_${currentUserId}`, JSON.stringify(data));
+            } else {
+                localStorage.setItem('tesco_performance', JSON.stringify(data));
+            }
+            performanceData = data;
+        }
+
+        // Add new performance record
+        function addPerformanceRecord() {
+            const date = document.getElementById('dateInput').value;
+            const picking = parseInt(document.getElementById('pickingInput').value) || 0;
+            const loading = parseInt(document.getElementById('loadingInput').value) || 0;
+            const oneShift = document.getElementById('oneShiftCheckbox').checked;
+            const userName = currentUserId ? 
+                JSON.parse(localStorage.getItem('tesco_currentUser')).name : 'Unknown User';
+            
+            if (picking > 0 || loading > 0) {
+                const recordDate = new Date(date);
+                const dayName = recordDate.toLocaleDateString('en-US', { weekday: 'long' });
+                
+                let dailyPerformance = 0;
+                if (oneShift) {
+                    dailyPerformance = (picking + loading) / 2;
+                } else {
+                    dailyPerformance = picking + loading;
+                }
+
+                const newRecord = {
+                    id: Date.now(),
+                    date: date,
+                    dayName: dayName,
+                    picking: picking,
+                    loading: loading,
+                    oneShift: oneShift,
+                    dailyPerformance: dailyPerformance,
+                    userName: userName,
+                    userId: currentUserId
+                };
+
+                const updatedData = [...performanceData, newRecord];
+                saveData(updatedData);
+                
+                document.getElementById('pickingInput').value = '';
+                document.getElementById('loadingInput').value = '';
+                document.getElementById('oneShiftCheckbox').checked = false;
+                
+                const activeView = document.querySelector('.view-btn.active').getAttribute('data-view');
+                switchView(activeView);
+            } else {
+                alert('Please enter at least one performance value');
+            }
+        }
+
+        // Edit performance record
+        function editRecord(id) {
+            const record = performanceData.find(r => r.id === id);
+            if (record) {
+                currentEditId = id;
+                document.getElementById('editDateInput').value = record.date;
+                document.getElementById('editPickingInput').value = record.picking;
+                document.getElementById('editLoadingInput').value = record.loading;
+                document.getElementById('editOneShiftCheckbox').checked = record.oneShift;
+                document.getElementById('editModal').style.display = 'flex';
+            }
+        }
+
+        // Save edited record
+        function saveEdit() {
+            if (currentEditId === null) return;
+            
+            const date = document.getElementById('editDateInput').value;
+            const picking = parseInt(document.getElementById('editPickingInput').value) || 0;
+            const loading = parseInt(document.getElementById('editLoadingInput').value) || 0;
+            const oneShift = document.getElementById('editOneShiftCheckbox').checked;
+            const userName = currentUserId ? 
+                JSON.parse(localStorage.getItem('tesco_currentUser')).name : 'Unknown User';
+            
+            if (picking > 0 || loading > 0) {
+                const recordDate = new Date(date);
+                const dayName = recordDate.toLocaleDateString('en-US', { weekday: 'long' });
+                
+                let dailyPerformance = 0;
+                if (oneShift) {
+                    dailyPerformance = (picking + loading) / 2;
+                } else {
+                    dailyPerformance = picking + loading;
+                }
+
+                const updatedData = performanceData.map(record => {
+                    if (record.id === currentEditId) {
+                        return {
+                            ...record,
+                            date: date,
+                            dayName: dayName,
+                            picking: picking,
+                            loading: loading,
+                            oneShift: oneShift,
+                            dailyPerformance: dailyPerformance,
+                            userName: userName,
+                            userId: currentUserId
+                        };
+                    }
+                    return record;
+                });
+                
+                saveData(updatedData);
+                cancelEdit();
+                
+                const activeView = document.querySelector('.view-btn.active').getAttribute('data-view');
+                switchView(activeView);
+            } else {
+                alert('Please enter at least one performance value');
+            }
+        }
+
+        // Cancel edit
+        function cancelEdit() {
+            currentEditId = null;
+            document.getElementById('editModal').style.display = 'none';
+        }
+
+        // Delete performance record
+        function deleteRecord(id) {
+            if (confirm('Are you sure you want to delete this record?')) {
+                const updatedData = performanceData.filter(record => record.id !== id);
+                saveData(updatedData);
+                
+                const activeView = document.querySelector('.view-btn.active').getAttribute('data-view');
+                switchView(activeView);
+            }
+        }
+
+        // The rest of your existing functions remain the same...
+        // [Include all the remaining functions from your original code, but they will now use the fixed storage keys]
+
+        // Get week for a date
+        function getWeekForDate(date) {
+            const recordDate = new Date(date);
+            for (const week of weeksData) {
+                const startDate = new Date(week.startDate);
+                const endDate = new Date(week.endDate);
+                
+                if (recordDate >= startDate && recordDate <= endDate) {
+                    return week;
+                }
+            }
+            return null;
+        }
+
+        // Calculate bonus based on performance
+        function calculateBonus(averagePerformance, hours = 37.5) {
+            if (averagePerformance >= 99) {
+                return hours * 1.00;
+            } else if (averagePerformance >= 92) {
+                return hours * 0.60;
+            } else if (averagePerformance >= 88) {
+                return hours * 0.30;
+            }
+            return 0;
+        }
+
+        // Get performance color class
+        function getPerformanceColor(performance) {
+            if (performance < 85) {
+                return 'performance-low';
+            } else if (performance < 88) {
+                return 'performance-medium';
+            } else {
+                return 'performance-high';
+            }
+        }
+
+        // Calculate weekly performance
+        function calculateWeeklyPerformance(weekData) {
+            const workDays = weekData.filter(day => 
+                !daysOff.includes(day.dayName) && !isHoliday(day.date)
+            );
+
+            if (workDays.length === 0) return { picking: 0, loading: 0, average: 0, bonus: 0 };
+
+            const totalPicking = workDays.reduce((sum, day) => sum + day.picking, 0);
+            const totalLoading = workDays.reduce((sum, day) => sum + day.loading, 0);
+            const totalPerformance = workDays.reduce((sum, day) => sum + day.dailyPerformance, 0);
+            const average = totalPerformance / 5;
+            const bonus = calculateBonus(average);
+
+            return {
+                picking: totalPicking,
+                loading: totalLoading,
+                average: average,
+                bonus: bonus
+            };
+        }
+
+        // Calculate monthly performance
+        function calculateMonthlyPerformance(monthData) {
+            const weeks = {};
+            monthData.forEach(record => {
+                const week = getWeekForDate(record.date);
+                if (week) {
+                    if (!weeks[week.id]) {
+                        weeks[week.id] = {
+                            week: week,
+                            data: []
+                        };
+                    }
+                    weeks[week.id].data.push(record);
+                }
+            });
+
+            const weeklyPerformances = Object.values(weeks).map(weekData => 
+                calculateWeeklyPerformance(weekData.data)
+            );
+
+            const totalPicking = weeklyPerformances.reduce((sum, week) => sum + week.picking, 0);
+            const totalLoading = weeklyPerformances.reduce((sum, week) => sum + week.loading, 0);
+            const totalAverage = weeklyPerformances.reduce((sum, week) => sum + week.average, 0);
+            const totalBonus = weeklyPerformances.reduce((sum, week) => sum + week.bonus, 0);
+
+            return {
+                weeks: weeklyPerformances,
+                totalPicking,
+                totalLoading,
+                monthlyAverage: totalAverage / weeklyPerformances.length,
+                totalBonus: totalBonus
+            };
+        }
+
+        // Get data for selected week
+        function getSelectedWeekData(selectedWeekId) {
+            if (!selectedWeekId) return [];
+            
+            const week = weeksData.find(w => w.id.toString() === selectedWeekId);
+            if (!week) return [];
+            
+            const weekData = performanceData.filter(record => {
+                const recordDate = new Date(record.date);
+                const startDate = new Date(week.startDate);
+                const endDate = new Date(week.endDate);
+                return recordDate >= startDate && recordDate <= endDate;
+            });
+            
+            return weekData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        // Get data for selected month
+        function getSelectedMonthData(selectedMonth) {
+            if (!selectedMonth) return [];
+            
+            const monthData = performanceData.filter(record => 
+                new Date(record.date).getMonth() + 1 === parseInt(selectedMonth)
+            );
+            
+            return monthData.sort((a, b) => new Date(a.date) - new Date(b.date));
+        }
+
+        // Get all available weeks for selection
+        function getAvailableWeeks() {
+            return weeksData.sort((a, b) => new Date(a.startDate) - new Date(b.startDate));
+        }
+
+        // Get all available months
+        function getAvailableMonths() {
+            const months = [...new Set(performanceData.map(record => 
+                new Date(record.date).getMonth() + 1
+            ))];
+            return months.sort((a, b) => a - b);
+        }
+
+        // Switch between views
+        function switchView(view) {
+            const contentSection = document.getElementById('contentSection');
+            
+            switch(view) {
+                case 'daily':
+                    contentSection.innerHTML = renderDailyPerformance();
+                    break;
+                case 'weekly':
+                    contentSection.innerHTML = renderWeeklyPerformance();
+                    break;
+                case 'monthly':
+                    contentSection.innerHTML = renderMonthlyPerformance();
+                    break;
+                case 'specificWeek':
+                    contentSection.innerHTML = renderSpecificWeek();
+                    break;
+                case 'specificMonth':
+                    contentSection.innerHTML = renderSpecificMonth();
+                    break;
+            }
+        }
+
+        // Render daily performance table
+        function renderDailyPerformance() {
+            if (performanceData.length === 0) {
+                return '<div class="table-container"><h3>Daily Performance Records</h3><p>No records yet. Add some performance data to get started.</p></div>';
+            }
+            
+            let html = `
+                <div class="table-container">
+                    <h3>Daily Performance Records</h3>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Performed By</th>
+                                <th>Date</th>
+                                <th>Day</th>
+                                <th>Picking</th>
+                                <th>Loading</th>
+                                <th>One Shift</th>
+                                <th>Daily Performance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            performanceData
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .forEach(record => {
+                    const isDayOff = daysOff.includes(record.dayName);
+                    const isHolidayDay = isHoliday(record.date);
+                    const holidayName = getHolidayName(record.date);
+                    
+                    let rowClass = '';
+                    let dayInfo = record.dayName;
+                    
+                    if (isDayOff) {
+                        rowClass = 'day-off';
+                        dayInfo += ' (Day Off)';
+                    } else if (isHolidayDay) {
+                        rowClass = 'holiday';
+                        dayInfo += ` (Holiday: ${holidayName})`;
+                    } else {
+                        rowClass = getPerformanceColor(record.dailyPerformance);
+                    }
+                    
+                    html += `
+                        <tr class="${rowClass}">
+                            <td><strong>${record.userName || 'Unknown User'}</strong></td>
+                            <td>${record.date}</td>
+                            <td>${dayInfo}</td>
+                            <td>${record.picking}</td>
+                            <td>${record.loading}</td>
+                            <td>${record.oneShift ? 'Yes' : 'No'}</td>
+                            <td><span class="percentage">${record.dailyPerformance.toFixed(2)}%</span></td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="edit-btn" onclick="editRecord(${record.id})">Edit</button>
+                                    <button class="delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
+                                </div>
+                            </td>
+                        </tr>`;
+                });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>`;
+            
+            return html;
+        }
+
+        // Render weekly performance
+        function renderWeeklyPerformance() {
+            if (performanceData.length === 0 || weeksData.length === 0) {
+                return '<div class="table-container"><h3>Weekly Performance Summary</h3><p>No records yet. Add some performance data and week definitions to get started.</p></div>';
+            }
+            
+            const weeksPerformance = {};
+            weeksData.forEach(week => {
+                const weekData = performanceData.filter(record => {
+                    const recordDate = new Date(record.date);
+                    const startDate = new Date(week.startDate);
+                    const endDate = new Date(week.endDate);
+                    return recordDate >= startDate && recordDate <= endDate;
+                });
+                weeksPerformance[week.id] = {
+                    week: week,
+                    data: weekData
+                };
+            });
+
+            let html = `
+                <div class="table-container">
+                    <div class="view-controls">
+                        <button class="download-btn download-record-btn" id="downloadWeeklyRecords">Download Weekly Records</button>
+                        <button class="download-btn" id="downloadWeeklyChart">Download Weekly Chart</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="weeklyChart"></canvas>
+                    </div>
+                    <h3>Weekly Performance Summary</h3>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Week</th>
+                                <th>Period</th>
+                                <th>Total Picking</th>
+                                <th>Total Loading</th>
+                                <th>Weekly Average</th>
+                                <th>Performance Bonus</th>
+                                <th>Work Days</th>
+                                <th>Holidays</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            Object.values(weeksPerformance)
+                .sort((a, b) => new Date(a.week.startDate) - new Date(b.week.startDate))
+                .forEach(({week, data}) => {
+                    const performance = calculateWeeklyPerformance(data);
+                    const workDays = data.filter(day => 
+                        !daysOff.includes(day.dayName) && !isHoliday(day.date)
+                    ).length;
+                    
+                    const holidaysInWeek = data.filter(day => isHoliday(day.date))
+                        .map(day => getHolidayName(day.date));
+                    const uniqueHolidays = [...new Set(holidaysInWeek)];
+                    
+                    html += `
+                        <tr>
+                            <td>${week.name}</td>
+                            <td>${formatDate(week.startDate)} - ${formatDate(week.endDate)}</td>
+                            <td>${performance.picking}</td>
+                            <td>${performance.loading}</td>
+                            <td><span class="percentage">${performance.average.toFixed(2)}%</span></td>
+                            <td><span class="bonus-amount">£${performance.bonus.toFixed(2)}</span></td>
+                            <td>${workDays}/5</td>
+                            <td>${uniqueHolidays.length > 0 ? uniqueHolidays.join(', ') : 'None'}</td>
+                        </tr>`;
+                });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>`;
+            
+            setTimeout(() => {
+                renderWeeklyChart(weeksPerformance);
+                document.getElementById('downloadWeeklyChart').addEventListener('click', downloadWeeklyChart);
+                document.getElementById('downloadWeeklyRecords').addEventListener('click', downloadWeeklyRecords);
+            }, 100);
+            
+            return html;
+        }
+
+        // Download weekly records as CSV
+        function downloadWeeklyRecords() {
+            if (performanceData.length === 0 || weeksData.length === 0) return;
+            
+            let csvContent = "Performed By,Week,Date,Day,Picking,Loading,One Shift,Daily Performance,Status\n";
+            
+            weeksData.sort((a, b) => new Date(a.startDate) - new Date(b.startDate)).forEach(week => {
+                const weekData = performanceData.filter(record => {
+                    const recordDate = new Date(record.date);
+                    const startDate = new Date(week.startDate);
+                    const endDate = new Date(week.endDate);
+                    return recordDate >= startDate && recordDate <= endDate;
+                }).sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                weekData.forEach(record => {
+                    let status = 'Working Day';
+                    if (daysOff.includes(record.dayName)) {
+                        status = 'Day Off';
+                    } else if (isHoliday(record.date)) {
+                        status = `Holiday: ${getHolidayName(record.date)}`;
+                    }
+                    
+                    csvContent += `"${record.userName || 'Unknown User'}","${week.name}","${record.date}","${record.dayName}",${record.picking},${record.loading},"${record.oneShift ? 'Yes' : 'No'}",${record.dailyPerformance.toFixed(2)}%,"${status}"\n`;
+                });
+            });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'weekly-performance-records.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Render weekly chart
+        function renderWeeklyChart(weeksPerformance) {
+            const ctx = document.getElementById('weeklyChart').getContext('2d');
+            
+            if (weeklyChart) {
+                weeklyChart.destroy();
+            }
+            
+            const weekLabels = Object.values(weeksPerformance)
+                .sort((a, b) => new Date(a.week.startDate) - new Date(b.week.startDate))
+                .map(({week}) => week.name);
+                
+            const pickingData = Object.values(weeksPerformance)
+                .sort((a, b) => new Date(a.week.startDate) - new Date(b.week.startDate))
+                .map(({data}) => {
+                    const performance = calculateWeeklyPerformance(data);
+                    return performance.picking;
+                });
+                
+            const loadingData = Object.values(weeksPerformance)
+                .sort((a, b) => new Date(a.week.startDate) - new Date(b.week.startDate))
+                .map(({data}) => {
+                    const performance = calculateWeeklyPerformance(data);
+                    return performance.loading;
+                });
+                
+            const averageData = Object.values(weeksPerformance)
+                .sort((a, b) => new Date(a.week.startDate) - new Date(b.week.startDate))
+                .map(({data}) => {
+                    const performance = calculateWeeklyPerformance(data);
+                    return performance.average;
+                });
+            
+            weeklyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: weekLabels,
+                    datasets: [
+                        {
+                            label: 'Picking',
+                            data: pickingData,
+                            backgroundColor: 'rgba(0, 83, 159, 0.7)',
+                            borderColor: 'rgba(0, 83, 159, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Loading',
+                            data: loadingData,
+                            backgroundColor: 'rgba(255, 0, 0, 0.7)',
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Average %',
+                            data: averageData,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Performance'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Weekly Performance Overview'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.label === 'Average %') {
+                                        label += context.parsed.y.toFixed(2) + '%';
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Download weekly chart
+        function downloadWeeklyChart() {
+            const canvas = document.getElementById('weeklyChart');
+            html2canvas(canvas).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'weekly-performance-chart.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Render monthly performance
+        function renderMonthlyPerformance() {
+            if (performanceData.length === 0) {
+                return '<div class="table-container"><h3>Monthly Performance Summary</h3><p>No records yet. Add some performance data to get started.</p></div>';
+            }
+            
+            const months = {};
+            performanceData.forEach(record => {
+                const monthNo = new Date(record.date).getMonth() + 1;
+                if (!months[monthNo]) {
+                    months[monthNo] = [];
+                }
+                months[monthNo].push(record);
+            });
+
+            let html = `
+                <div class="table-container">
+                    <div class="view-controls">
+                        <button class="download-btn download-record-btn" id="downloadMonthlyRecords">Download Monthly Records</button>
+                        <button class="download-btn" id="downloadMonthlyChart">Download Monthly Chart</button>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="monthlyChart"></canvas>
+                    </div>
+                    <h3>Monthly Performance Summary</h3>
+                    <table class="performance-table">
+                        <thead>
+                            <tr>
+                                <th>Month</th>
+                                <th>Total Picking</th>
+                                <th>Total Loading</th>
+                                <th>Monthly Average</th>
+                                <th>Total Bonus</th>
+                                <th>Weeks</th>
+                                <th>Holidays</th>
+                            </tr>
+                        </thead>
+                        <tbody>`;
+            
+            Object.entries(months)
+                .sort(([a], [b]) => a - b)
+                .forEach(([monthNo, monthData]) => {
+                    const performance = calculateMonthlyPerformance(monthData);
+                    const holidaysInMonth = monthData.filter(day => isHoliday(day.date))
+                        .map(day => getHolidayName(day.date));
+                    const uniqueHolidays = [...new Set(holidaysInMonth)];
+                    
+                    html += `
+                        <tr>
+                            <td>Month ${monthNo}</td>
+                            <td>${performance.totalPicking}</td>
+                            <td>${performance.totalLoading}</td>
+                            <td><span class="percentage">${performance.monthlyAverage.toFixed(2)}%</span></td>
+                            <td><span class="bonus-amount">£${performance.totalBonus.toFixed(2)}</span></td>
+                            <td>${performance.weeks.length}</td>
+                            <td>${uniqueHolidays.length > 0 ? uniqueHolidays.join(', ') : 'None'}</td>
+                        </tr>`;
+                });
+            
+            html += `
+                        </tbody>
+                    </table>
+                </div>`;
+            
+            setTimeout(() => {
+                renderMonthlyChart(months);
+                document.getElementById('downloadMonthlyChart').addEventListener('click', downloadMonthlyChart);
+                document.getElementById('downloadMonthlyRecords').addEventListener('click', downloadMonthlyRecords);
+            }, 100);
+            
+            return html;
+        }
+
+        // Download monthly records as CSV
+        function downloadMonthlyRecords() {
+            if (performanceData.length === 0) return;
+            
+            let csvContent = "Performed By,Month,Date,Day,Picking,Loading,One Shift,Daily Performance,Status\n";
+            
+            const months = {};
+            performanceData.forEach(record => {
+                const monthNo = new Date(record.date).getMonth() + 1;
+                if (!months[monthNo]) {
+                    months[monthNo] = [];
+                }
+                months[monthNo].push(record);
+            });
+            
+            Object.entries(months)
+                .sort(([a], [b]) => a - b)
+                .forEach(([monthNo, monthData]) => {
+                    monthData.sort((a, b) => new Date(a.date) - new Date(b.date)).forEach(record => {
+                        let status = 'Working Day';
+                        if (daysOff.includes(record.dayName)) {
+                            status = 'Day Off';
+                        } else if (isHoliday(record.date)) {
+                            status = `Holiday: ${getHolidayName(record.date)}`;
+                        }
+                        
+                        csvContent += `"${record.userName || 'Unknown User'}","Month ${monthNo}","${record.date}","${record.dayName}",${record.picking},${record.loading},"${record.oneShift ? 'Yes' : 'No'}",${record.dailyPerformance.toFixed(2)}%,"${status}"\n`;
+                    });
+                });
+            
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'monthly-performance-records.csv';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // Render monthly chart
+        function renderMonthlyChart(months) {
+            const ctx = document.getElementById('monthlyChart').getContext('2d');
+            
+            if (monthlyChart) {
+                monthlyChart.destroy();
+            }
+            
+            const monthLabels = Object.keys(months).sort((a, b) => a - b).map(m => `Month ${m}`);
+            const pickingData = Object.keys(months).sort((a, b) => a - b).map(month => {
+                const performance = calculateMonthlyPerformance(months[month]);
+                return performance.totalPicking;
+            });
+            const loadingData = Object.keys(months).sort((a, b) => a - b).map(month => {
+                const performance = calculateMonthlyPerformance(months[month]);
+                return performance.totalLoading;
+            });
+            const averageData = Object.keys(months).sort((a, b) => a - b).map(month => {
+                const performance = calculateMonthlyPerformance(months[month]);
+                return performance.monthlyAverage;
+            });
+            
+            monthlyChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: monthLabels,
+                    datasets: [
+                        {
+                            label: 'Total Picking',
+                            data: pickingData,
+                            backgroundColor: 'rgba(0, 83, 159, 0.7)',
+                            borderColor: 'rgba(0, 83, 159, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Total Loading',
+                            data: loadingData,
+                            backgroundColor: 'rgba(255, 0, 0, 0.7)',
+                            borderColor: 'rgba(255, 0, 0, 1)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Monthly Average %',
+                            data: averageData,
+                            type: 'line',
+                            fill: false,
+                            borderColor: 'rgba(75, 192, 192, 1)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            title: {
+                                display: true,
+                                text: 'Performance'
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Monthly Performance Overview'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.dataset.label === 'Monthly Average %') {
+                                        label += context.parsed.y.toFixed(2) + '%';
+                                    } else {
+                                        label += context.parsed.y;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Download monthly chart
+        function downloadMonthlyChart() {
+            const canvas = document.getElementById('monthlyChart');
+            html2canvas(canvas).then(canvas => {
+                const link = document.createElement('a');
+                link.download = 'monthly-performance-chart.png';
+                link.href = canvas.toDataURL();
+                link.click();
+            });
+        }
+
+        // Render specific week view
+        function renderSpecificWeek() {
+            let html = `
+                <div class="table-container">
+                    <div class="view-controls">
+                        <select id="weekSelect">
+                            <option value="">Select Week</option>`;
+            
+            const availableWeeks = getAvailableWeeks();
+            availableWeeks.forEach(week => {
+                html += `<option value="${week.id}">${week.name} (${formatDate(week.startDate)} - ${formatDate(week.endDate)})</option>`;
+            });
+            
+            html += `
+                        </select>
+                    </div>
+                    <div id="weekContent"></div>
+                </div>`;
+            
+            setTimeout(() => {
+                document.getElementById('weekSelect').addEventListener('change', function() {
+                    const selectedWeekId = this.value;
+                    updateWeekContent(selectedWeekId);
+                });
+            }, 0);
+            
+            return html;
+        }
+
+        // Update week content based on selection
+        function updateWeekContent(selectedWeekId) {
+            const weekContent = document.getElementById('weekContent');
+            
+            if (!selectedWeekId) {
+                weekContent.innerHTML = '';
+                return;
+            }
+            
+            const weekData = getSelectedWeekData(selectedWeekId);
+            const week = weeksData.find(w => w.id.toString() === selectedWeekId);
+            const performance = calculateWeeklyPerformance(weekData);
+            
+            let html = `
+                <h3>${week.name} Performance (${formatDate(week.startDate)} - ${formatDate(week.endDate)})</h3>
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>Performed By</th>
+                            <th>Date</th>
+                            <th>Day</th>
+                            <th>Picking</th>
+                            <th>Loading</th>
+                            <th>One Shift</th>
+                            <th>Daily Performance</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            weekData.forEach(record => {
+                const isDayOff = daysOff.includes(record.dayName);
+                const isHolidayDay = isHoliday(record.date);
+                const holidayName = getHolidayName(record.date);
+                
+                let rowClass = '';
+                let dayInfo = record.dayName;
+                
+                if (isDayOff) {
+                    rowClass = 'day-off';
+                    dayInfo += ' (Day Off)';
+                } else if (isHolidayDay) {
+                    rowClass = 'holiday';
+                    dayInfo += ` (Holiday: ${holidayName})`;
+                } else {
+                    rowClass = getPerformanceColor(record.dailyPerformance);
+                }
+                
+                html += `
+                    <tr class="${rowClass}">
+                        <td><strong>${record.userName || 'Unknown User'}</strong></td>
+                        <td>${record.date}</td>
+                        <td>${dayInfo}</td>
+                        <td>${record.picking}</td>
+                        <td>${record.loading}</td>
+                        <td>${record.oneShift ? 'Yes' : 'No'}</td>
+                        <td><span class="percentage">${record.dailyPerformance.toFixed(2)}%</span></td>
+                        <td>
+                            <div class="action-buttons">
+                                <button class="edit-btn" onclick="editRecord(${record.id})">Edit</button>
+                                <button class="delete-btn" onclick="deleteRecord(${record.id})">Delete</button>
+                            </div>
+                        </td>
+                    </tr>`;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+                
+                <div class="summary">
+                    <h4>${week.name} Summary</h4>
+                    <p>Total Picking: ${performance.picking}</p>
+                    <p>Total Loading: ${performance.loading}</p>
+                    <p>Weekly Average: <span class="percentage">${performance.average.toFixed(2)}%</span></p>
+                    <p>Performance Bonus: <span class="bonus-amount">£${performance.bonus.toFixed(2)}</span></p>
+                </div>`;
+            
+            weekContent.innerHTML = html;
+        }
+
+        // Render specific month view
+        function renderSpecificMonth() {
+            let html = `
+                <div class="table-container">
+                    <div class="view-controls">
+                        <select id="monthSelect">
+                            <option value="">Select Month</option>`;
+            
+            const availableMonths = getAvailableMonths();
+            availableMonths.forEach(month => {
+                html += `<option value="${month}">Month ${month}</option>`;
+            });
+            
+            html += `
+                        </select>
+                    </div>
+                    <div id="monthContent"></div>
+                </div>`;
+            
+            setTimeout(() => {
+                document.getElementById('monthSelect').addEventListener('change', function() {
+                    const selectedMonth = this.value;
+                    updateMonthContent(selectedMonth);
+                });
+            }, 0);
+            
+            return html;
+        }
+
+        // Update month content based on selection
+        function updateMonthContent(selectedMonth) {
+            const monthContent = document.getElementById('monthContent');
+            
+            if (!selectedMonth) {
+                monthContent.innerHTML = '';
+                return;
+            }
+            
+            const monthData = getSelectedMonthData(selectedMonth);
+            const performance = calculateMonthlyPerformance(monthData);
+            
+            let html = `
+                <h3>Month ${selectedMonth} Performance</h3>
+                <table class="performance-table">
+                    <thead>
+                        <tr>
+                            <th>Week</th>
+                            <th>Total Picking</th>
+                            <th>Total Loading</th>
+                            <th>Weekly Average</th>
+                            <th>Performance Bonus</th>
+                        </tr>
+                    </thead>
+                    <tbody>`;
+            
+            performance.weeks.forEach((week, index) => {
+                html += `
+                    <tr>
+                        <td>Week ${index + 1}</td>
+                        <td>${week.picking}</td>
+                        <td>${week.loading}</td>
+                        <td><span class="percentage">${week.average.toFixed(2)}%</span></td>
+                        <td><span class="bonus-amount">£${week.bonus.toFixed(2)}</span></td>
+                    </tr>`;
+            });
+            
+            html += `
+                    </tbody>
+                </table>
+                
+                <div class="summary">
+                    <h4>Month ${selectedMonth} Summary</h4>
+                    <p>Total Picking: ${performance.totalPicking}</p>
+                    <p>Total Loading: ${performance.totalLoading}</p>
+                    <p>Monthly Average: <span class="percentage">${performance.monthlyAverage.toFixed(2)}%</span></p>
+                    <p>Total Bonus: <span class="bonus-amount">£${performance.totalBonus.toFixed(2)}</span></p>
+                </div>`;
+            
+            monthContent.innerHTML = html;
+        }
+    </script>
+</body>
+</html>
